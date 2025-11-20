@@ -82,7 +82,45 @@ if resultados:
     st.pyplot(fig)
 else:
     st.info("Sube archivos FASTA o activa la opción de leer desde la carpeta para ver resultados.") #al no marcar la opción de "leerlos desde carpeta local", se pueden seleccionar los archivos fasta manualmente (acción a realizar si no se cambia la ruta en la linea 46 del codigo)
-    
+ 
+#=====AGENTE=====
+from openai import OpenAI
+
+st.header("Descripción automática de resultados (%GC)")
+
+api_key = st.text_input("Ingresa tu API Key de OpenAI:", type="password")
+
+if api_key and resultados:
+
+    client = OpenAI(api_key=api_key)
+
+    # Identificar mayor y menor GC
+    organismo_mayor = df.loc[df["%GC"].idxmax()]
+    organismo_menor = df.loc[df["%GC"].idxmin()]
+
+    prompt = f"""
+    A partir de los siguientes datos de contenido GC por organismo:
+
+    {df.to_string(index=False)}
+
+    Escribe un párrafo claro, conciso y biológicamente correcto que:
+    - Describa los resultados generales del análisis.
+    - Identifique cuál organismo tiene el mayor %GC.
+    - Identifique cuál organismo tiene el menor %GC.
+    - Explique brevemente qué puede significar esta diferencia desde un punto de vista fenotípico.
+    """
+
+    if st.button("Generar párrafo automático"):
+        respuesta = client.responses.create(
+            model="gpt-4.1-mini",
+            input=prompt
+        )
+        
+        parrafo = respuesta.output_text
+
+        st.subheader("Párrafo generado:")
+        st.write(parrafo)   
+
 
 
 
