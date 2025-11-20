@@ -1,0 +1,94 @@
+
+import os
+import re
+import pandas as pd
+import matplotlib.pyplot as plt
+import streamlit as st
+from openai import OpenAI
+
+
+# ============================================================
+# TÍTULO DEL DASHBOARD
+# ============================================================
+st.title("Análisis de %GC de secuencias FASTA")
+
+
+# ============================================================
+# VARIABLES GLOBALES NECESARIAS
+# ============================================================
+resultados = []          # <-- AQUÍ se define
+nombres_usados = set()   # <-- AQUÍ se define
+
+
+# ============================================================
+# FUNCIÓN PARA CALCULAR GC
+# ============================================================
+def calcular_gc(seq):
+    seq = seq.upper()
+    gc_count = seq.count("G") + seq.count("C")
+    total_bases = len(seq.replace("N", ""))  # se ignoran Ns
+    return round((gc_count / total_bases) * 100, 2) if total_bases > 0 else 0
+
+
+# ============================================================
+# FUNCIÓN PARA LIMPIAR Y SIMPLIFICAR NOMBRE DE ORGANISMO
+# ============================================================
+def nombre_bacteria(encabezado, nombres_usados, max_words=4):
+    nombre = encabezado.replace(">", "").strip()
+    nombre = re.sub(r"[^A-Za-z\s]", "", nombre)
+    palabras = nombre.split()[:max_words]
+    nombre_corto = "_".join(palabras)
+    contador = 1
+    nombre_final = nombre_corto
+
+    while nombre_final in nombres_usados:
+        nombre_final = f"{nombre_corto}_{contador}"
+        contador += 1
+
+    nombres_usados.add(nombre_final)
+    return nombre_final
+
+
+# ============================================================
+# SUBIDA MANUAL DE ARCHIVOS FASTA
+# ============================================================
+uploaded_files = st.file_uploader(
+    "Sube tus archivos FASTA (opcional si quieres usar la carpeta)",
+    type=["fasta", "fa"],
+    accept_multiple_files=True
+)
+
+
+# ============================================================
+# PROCESAMIENTO DE ARCHIVOS SUBIDOS
+# ============================================================
+if uploaded_files:
+    for file in uploaded_files:
+        lineas = file.read().decode("utf-8").splitlines()
+        encabezado = lineas[0]
+        secuencia = "".join(lineas[1:])
+
+        gc = calcular_gc(secuencia)
+        nombre_final = nombre_bacteria(encabezado, nombres_usados)
+
+        resultados.append({"Organismo": nombre_final, "%GC": gc})
+
+
+# ============================================================
+# MOSTRAR RESULTADOS
+# ============================================================
+if len(resultados) > 0:
+    df = pd.DataFrame(resultados)
+
+    st.subheader("Tabla de resultados")
+    st.dataframe(df)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(df["Organismo"], df["%GC"])
+    plt.xticks(rotation=45, ha="right")
+    plt.ylabel("% de GC")
+    plt.title("Comparación del contenido GC entre secuencias")
+    plt.tight_layout()
+    st.pyplot(fig)
+else:
+    st.info("Sube archivos FASTA o activa la opción de leer desde la carpeta para ver resultados.")
