@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 
-st.title("An·lisis de %GC de secuencias FASTA")
+st.title("An√°lisis de %GC de secuencias FASTA")
 
 # ======= FUNCION PARA CALCULAR %GC, se hace una suma de las bases G y C para dividirlo entre el total de bases, y poder sacar el % =========
 def calcular_gc(seq):
@@ -21,7 +21,7 @@ def calcular_gc(seq):
 
 # ======= FUNCION PARA SIMPLIFICAR LOS NOMBRES, simplifica la lectura =========
 def nombre_bacteria(encabezado, nombres_usados, max_words=4):
-    # Quitar '>' y caracteres no alfabÈticos
+    # Quitar '>' y caracteres no alfab√©ticos
     nombre = encabezado.replace(">", "").strip()
     nombre = re.sub(r'[^A-Za-z\s]', '', nombre)  # solo letras y espacios
     palabras = nombre.split()[:max_words]  # solo primeras N palabras
@@ -48,7 +48,7 @@ ruta_carpeta = r"C:\Users\gj301\OneDrive\Escritorio\Python\Proyecto1\Proyecto_1\
 resultados = []
 nombres_usados = set()
 
-# ======= PROCESAR ARCHIVOS: subir los archivos fasta, para los cuales se calcular· el GC de cada organismo ======
+# ======= PROCESAR ARCHIVOS: subir los archivos fasta, para los cuales se calcular√° el GC de cada organismo ======
 if uploaded_files:
     for file in uploaded_files:
         lineas = file.read().decode("utf-8").splitlines()
@@ -73,16 +73,17 @@ if resultados:
     st.subheader("Tabla de resultados")
     st.dataframe(df)
 
-    fig, ax = plt.subplots(figsize=(10,6)) #creaciÛn de un gr·fico de barras
+    fig, ax = plt.subplots(figsize=(10,6)) #creaci√≥n de un gr√°fico de barras
     ax.bar(df["Organismo"], df["%GC"], color="blue")
     plt.xticks(rotation=45, ha="right")
     plt.ylabel("% de GC")
-    plt.title("ComparaciÛn del contenido GC entre secuencias")
+    plt.title("Comparaci√≥n del contenido GC entre secuencias")
     plt.tight_layout()
     st.pyplot(fig)
 else:
-    st.info("Sube archivos FASTA o activa la opciÛn de leer desde la carpeta para ver resultados.") #al no marcar la opciÛn de "leerlos desde carpeta local", se pueden seleccionar los archivos fasta manualmente (acciÛn a realizar si no se cambia la ruta en la linea 46 del codigo)
+    st.info("Sube archivos FASTA o activa la opci√≥n de leer desde la carpeta para ver resultados.") #al no marcar la opci√≥n de "leerlos desde carpeta local", se pueden seleccionar los archivos fasta manualmente (acci√≥n a realizar si no se cambia la ruta en la linea 46 del codigo)
     
+
 
 
 
