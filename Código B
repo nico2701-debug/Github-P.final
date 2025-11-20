@@ -92,3 +92,49 @@ if len(resultados) > 0:
     st.pyplot(fig)
 else:
     st.info("Sube archivos FASTA o activa la opción de leer desde la carpeta para ver resultados.")
+
+    # ======= AGENTE IA =======
+    st.header("Descripción automática de resultados (%GC)")
+
+    # Campo seguro para API Key
+    api_key = st.text_input("Ingresa tu OpenAI API Key", type="password")
+
+    if api_key:
+        client = OpenAI(api_key=api_key)
+
+        max_gc = df.loc[df["%GC"].idxmax()]
+        min_gc = df.loc[df["%GC"].idxmin()]
+
+        prompt = f"""
+Analiza los siguientes resultados de %GC de secuencias FASTA:
+
+{df.to_string(index=False)}
+
+Indica en un párrafo:
+- Cuál organismo tiene mayor %GC
+- Cuál tiene menor %GC
+- Qué significan estas diferencias desde un punto de vista biológico/funcional
+- Haz dos versiones de la respuesta una en español y otra en inglés 
+"""
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "Eres un asistente experto en biología molecular."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3
+            )
+
+            descripcion = response.choices[0].message.content
+            st.subheader("Descripción generada por IA:")
+            st.write(descripcion)
+
+        except Exception as e:
+            st.error(f"Error al generar descripción: {e}")
+
+else:
+    st.info("Sube archivos FASTA o activa la lectura desde carpeta para iniciar el análisis.")
+
+   
