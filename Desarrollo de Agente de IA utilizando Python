@@ -1,6 +1,6 @@
 # -*- coding: latin-1 -*-
 # Proyecto_1_dashboard.py
-# Autor: Giovanni Mogollon Bastardo
+# Autores: Giovanni, Nicole y Valeria
 # Dashboard para análisis de %GC + Agente IA
 
 import re
